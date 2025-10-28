@@ -48,20 +48,20 @@ def main():
     print("="*60)
     
     # Variables Numéricas (para cálculos)
-    print("🔢 VARIABLES NUMÉRICAS:")
+    print(" VARIABLES NUMÉRICAS:")
     print("- CodigoMunicipio (int64)")
     print("- CodigoRegion (int64)") 
     print("- Anio (int64)")
     print("- NumeroCasos (int64)")
     
     # Variables Categóricas (para agrupar y contar)
-    print("\n🏷️ VARIABLES CATEGÓRICAS:")
+    print("\n VARIABLES CATEGÓRICAS:")
     print("- NombreRegion (object → ideal para category)")
     print("- CausaMortalidad (object → ideal para category)")
     print("- TipoPoblacionObjetivo (object → ideal para category)")
     
     # Variables de Texto (para manipulación)
-    print("\n📝 VARIABLES DE TEXTO:")
+    print("\n VARIABLES DE TEXTO:")
     print("- NombreMunicipio (object)")
     print("- Ubicación (object)")
     
@@ -89,7 +89,7 @@ def main():
     df['CausaMortalidad'] = df['CausaMortalidad'].astype('category')
     df['TipoPoblacionObjetivo'] = df['TipoPoblacionObjetivo'].astype('category')
     
-    print("✅ Variables convertidas a categóricas")
+    print(" Variables convertidas a categóricas")
     print(f"Tipos actualizados:\n{df[['NombreRegion', 'CausaMortalidad', 'TipoPoblacionObjetivo']].dtypes}")
     
     # 6. PRIMERAS RESPUESTAS A TUS PREGUNTAS
@@ -98,12 +98,12 @@ def main():
     print("="*50)
     
     # Pregunta 1: ¿En qué años hubieron más suicidios?
-    print("\n📅 1. TOTAL DE SUICIDIOS POR AÑO:")
+    print("\n 1. TOTAL DE SUICIDIOS POR AÑO:")
     suicidios_por_anio = df.groupby('Anio')['NumeroCasos'].sum()
     print(suicidios_por_anio)
     
     # Pregunta 2: ¿Cuáles regiones tienen más suicidios?
-    print("\n🏙️  2. TOTAL DE SUICIDIOS POR REGIÓN:")
+    print("\n  2. TOTAL DE SUICIDIOS POR REGIÓN:")
     suicidios_por_region = df.groupby('NombreRegion')['NumeroCasos'].sum().sort_values(ascending=False)
     print(suicidios_por_region)
 
@@ -116,12 +116,12 @@ def main():
     regiones_criticas = ['VALLE DE ABURRA', 'ORIENTE']
     df_regiones_criticas = df[df['NombreRegion'].isin(regiones_criticas)]
     
-    print("📊 SUICIDIOS EN REGIONES CRÍTICAS POR AÑO:")
+    print(" SUICIDIOS EN REGIONES CRÍTICAS POR AÑO:")
     suicidios_regiones_anio = df_regiones_criticas.groupby(['NombreRegion', 'Anio'])['NumeroCasos'].sum()
     print(suicidios_regiones_anio.head(10))  # Mostramos primeros 10 resultados
     
     # 8. IDENTIFICAR MUNICIPIOS MÁS AFECTADOS
-    print("\n🏆 TOP 10 MUNICIPIOS CON MÁS CASOS:")
+    print("\n TOP 10 MUNICIPIOS CON MÁS CASOS:")
     top_municipios = df.groupby('NombreMunicipio')['NumeroCasos'].sum().sort_values(ascending=False).head(10)
     print(top_municipios)
     
@@ -131,25 +131,25 @@ def main():
     print("="*50)
     
     # A. Municipio con MÁS casos en un solo año
-    print("🏆 MUNICIPIO CON MÁS CASOS EN UN AÑO:")
+    print(" MUNICIPIO CON MÁS CASOS EN UN AÑO:")
     max_casos = df['NumeroCasos'].max()
     municipio_max = df[df['NumeroCasos'] == max_casos][['NombreMunicipio', 'Anio', 'NumeroCasos']]
     print(municipio_max)
     
     # B. Año con MÁS casos totales
-    print("\n📅 AÑO CON MÁS SUICIDIOS TOTALES:")
+    print("\n AÑO CON MÁS SUICIDIOS TOTALES:")
     anio_max = df.groupby('Anio')['NumeroCasos'].sum().idxmax()
     total_anio_max = df.groupby('Anio')['NumeroCasos'].sum().max()
     print(f"Año: {anio_max}, Total casos: {total_anio_max}")
     
     # C. Top 5 municipios con más casos acumulados
-    print("\n🏆 TOP 5 MUNICIPIOS (ACUMULADO TODOS LOS AÑOS):")
+    print("\n TOP 5 MUNICIPIOS (ACUMULADO TODOS LOS AÑOS):")
     top5_municipios = df.groupby('NombreMunicipio')['NumeroCasos'].sum().sort_values(ascending=False).head(5)
     print(top5_municipios)
 
         # 10. RESUMEN EJECUTIVO FINAL
     print("\n" + "="*60)
-    print("📊 RESUMEN EJECUTIVO - SUICIDIOS EN ANTIOQUIA")
+    print(" RESUMEN EJECUTIVO - SUICIDIOS EN ANTIOQUIA")
     print("="*60)
     
     # Hallazgos principales
@@ -157,19 +157,19 @@ def main():
     años_analizados = df['Anio'].nunique()
     municipios_analizados = df['NombreMunicipio'].nunique()
     
-    print(f"📈 TOTAL SUICIDIOS REGISTRADOS: {total_suicidios:,}")
-    print(f"📅 PERIODO ANALIZADO: {años_analizados} años ({df['Anio'].min()} - {df['Anio'].max()})")
-    print(f"🏙️  MUNICIPIOS ANALIZADOS: {municipios_analizados}")
-    print(f"🔥 AÑO MÁS CRÍTICO: {anio_max} ({total_anio_max} casos)")
-    print(f"📍 REGIONES MÁS AFECTADAS: VALLE DE ABURRA y ORIENTE")
+    print(f" TOTAL SUICIDIOS REGISTRADOS: {total_suicidios:,}")
+    print(f" PERIODO ANALIZADO: {años_analizados} años ({df['Anio'].min()} - {df['Anio'].max()})")
+    print(f"  MUNICIPIOS ANALIZADOS: {municipios_analizados}")
+    print(f" AÑO MÁS CRÍTICO: {anio_max} ({total_anio_max} casos)")
+    print(f" REGIONES MÁS AFECTADAS: VALLE DE ABURRA y ORIENTE")
     
     # Municipio con máximo casos
-    print(f"🚨 MUNICIPIO MÁS AFECTADO EN UN AÑO: {municipio_max['NombreMunicipio'].values[0]}")
+    print(f"MUNICIPIO MÁS AFECTADO EN UN AÑO: {municipio_max['NombreMunicipio'].values[0]}")
     print(f"   - Año: {municipio_max['Anio'].values[0]}")
     print(f"   - Casos: {municipio_max['NumeroCasos'].values[0]}")
     
     print("\n" + "="*60)
-    print("✅ ANÁLISIS COMPLETADO")
+    print(" ANÁLISIS COMPLETADO")
     print("="*60)
 if __name__ == "__main__":
     main()
