@@ -1,175 +1,77 @@
 import pandas as pd
 
 def main():
-    print("=== ANÁLISIS DE SUICIDIOS EN ANTIOQUIA ===\n")
+    print("="*60)
+    print("ANÁLISIS DE SUICIDIOS EN ANTIOQUIA (2005-2024)")
+    print("="*60)
     
-    # 1. Cargar el dataset
-    print("Cargando dataset...")
+    # 1. CARGAR DATOS
     df = pd.read_csv('suicidios-en-antioquia.csv')
     
-    # 2. Exploración inicial básica
-    print("=== FORMA DEL DATASET ===")
-    print(f"Filas: {df.shape[0]}, Columnas: {df.shape[1]}")
+    # 2. INFORMACIÓN BÁSICA
+    print(f"\nLas dimensiones del DataFrame son: {df.shape[0]} filas x {df.shape[1]} columnas")
     
-    print("\n=== PRIMERAS 5 FILAS ===")
-    print(df.head())
-    
-    print("\n=== TIPOS DE DATOS ACTUALES ===")
+    print("\n=== TIPOS DE DATOS ORIGINALES ===")
     print(df.dtypes)
     
-    print("\n=== INFORMACIÓN GENERAL ===")
-    print(df.info())
-        # 3. LIMPIEZA Y TRANSFORMACIÓN (según documento permitido)
-    print("\n" + "="*50)
-    print("TRANSFORMACIÓN DE VARIABLES")
-    print("="*50)
+    # 3. TRANSFORMACIONES (solo las permitidas)
+    print("\n=== APLICANDO TRANSFORMACIONES ===")
     
-    # A. Convertir NumeroPoblacionObjetivo a numérico (quitando comas)
-    print("Convirtiendo NumeroPoblacionObjetivo a numérico...")
+    # Limpiar y convertir NumeroPoblacionObjetivo
     df['NumeroPoblacionObjetivo'] = df['NumeroPoblacionObjetivo'].str.replace(',', '').astype(int)
     
-    # B. Convertir variables categóricas
-    print("Convirtiendo variables categóricas...")
+    # Convertir variables categóricas
     df['NombreRegion'] = df['NombreRegion'].astype('category')
-    df['CausaMortalidad'] = df['CausaMortalidad'].astype('category')
     df['TipoPoblacionObjetivo'] = df['TipoPoblacionObjetivo'].astype('category')
     
-    # C. Verificar cambios
-    print("\n=== TIPOS DE DATOS DESPUÉS DE TRANSFORMACIONES ===")
-    print(df.dtypes)
+    print("✅ Las transformaciones han sido completadas exitosamente.")
     
-    # D. Resumen estadístico de variables numéricas
-    print("\n=== RESUMEN ESTADÍSTICO (NUMÉRICAS) ===")
-    print(df.describe())
-
-        # 3. CLASIFICACIÓN OFICIAL DE VARIABLES (según documento)
+    # 4. RESUMEN DE VARIABLES NUMÉRICAS
+    print("\n=== RESUMEN DE VARIABLES NUMÉRICAS ===")
+    print(df[['Anio', 'NumeroCasos', 'NumeroPoblacionObjetivo']].describe())
+    
+    # 5. RESPONDER LAS 5 PREGUNTAS
     print("\n" + "="*60)
-    print("CLASIFICACIÓN DE VARIABLES SEGÚN DOCUMENTO")
-    print("="*60)
+    print("RESPUESTAS A PREGUNTAS CLAVE")
+    print("-"*60)
     
-    # Variables Numéricas (para cálculos)
-    print(" VARIABLES NUMÉRICAS:")
-    print("- CodigoMunicipio (int64)")
-    print("- CodigoRegion (int64)") 
-    print("- Anio (int64)")
-    print("- NumeroCasos (int64)")
+    # Pregunta 1: Región con mayor necesidad de atención
+    print("\n1️⃣  ¿Qué región requiere mayor atención?")
+    casos_region = df.groupby('NombreRegion', observed=True)['NumeroCasos'].sum().sort_values(ascending=False)
+    print(casos_region)
     
-    # Variables Categóricas (para agrupar y contar)
-    print("\n VARIABLES CATEGÓRICAS:")
-    print("- NombreRegion (object → ideal para category)")
-    print("- CausaMortalidad (object → ideal para category)")
-    print("- TipoPoblacionObjetivo (object → ideal para category)")
+    # Pregunta 2: Tendencia temporal
+    print("\n2️⃣  Tendencia de casos por año:")
+    casos_anio = df.groupby('Anio')['NumeroCasos'].sum()
+    print(casos_anio)
+    print(f"Año con más casos: {casos_anio.idxmax()} ({casos_anio.max()} casos)")
     
-    # Variables de Texto (para manipulación)
-    print("\n VARIABLES DE TEXTO:")
-    print("- NombreMunicipio (object)")
-    print("- Ubicación (object)")
+    # Pregunta 3: Top 10 municipios
+    print("\n3️⃣  Top 10 municipios más afectados:")
+    top10 = df.groupby('NombreMunicipio')['NumeroCasos'].sum().sort_values(ascending=False).head(10)
+    print(top10)
     
-    # 4. RESUMENES BÁSICOS PERMITIDOS
-    print("\n" + "="*60)
-    print("RESUMENES ESTADÍSTICOS BÁSICOS")
-    print("="*60)
+    # Pregunta 4: Análisis de municipios pequeños (esto requiere calcular tasas)
+    print("\n4️⃣  Municipios pequeños con altas tasas:")
+    # Agregar por municipio
+    df_municipios = df.groupby('NombreMunicipio').agg({
+        'NumeroCasos': 'sum',
+        'NumeroPoblacionObjetivo': 'mean'  # Promedio de población
+    }).reset_index()
     
-    print("\n=== RESUMEN NUMÉRICO ===")
-    print(df[['CodigoMunicipio', 'CodigoRegion', 'Anio', 'NumeroCasos']].describe())
+    # Calcular tasa por 100,000 habitantes
+    df_municipios['Tasa'] = (df_municipios['NumeroCasos'] / df_municipios['NumeroPoblacionObjetivo']) * 100000
     
-    print("\n=== DISTRIBUCIÓN POR REGIÓN ===")
-    print(df['NombreRegion'].value_counts())
+    # Filtrar municipios pequeños (< 10,000 hab)
+    municipios_pequeños = df_municipios[df_municipios['NumeroPoblacionObjetivo'] < 10000]
+    print(municipios_pequeños.nlargest(5, 'Tasa')[['NombreMunicipio', 'Tasa']])
     
-    print("\n=== DISTRIBUCIÓN POR AÑO ===")
-    print(df['Anio'].value_counts().sort_index())
+    # Pregunta 5: Correlación población-casos
+    print("\n5️⃣  Correlación entre población y casos:")
+    correlacion = df_municipios['NumeroPoblacionObjetivo'].corr(df_municipios['NumeroCasos'])
+    print(f"   Coeficiente de correlación: {correlacion:.4f}")
+    
+    print("\nAnálisis completado.")
 
-        # 5. CONVERSIÓN A CATEGÓRICAS (según documento permitido)
-    print("\n" + "="*50)
-    print("CONVERSIÓN A VARIABLES CATEGÓRICAS")
-    print("="*50)
-    
-    # Convertir a category como muestra el documento
-    df['NombreRegion'] = df['NombreRegion'].astype('category')
-    df['CausaMortalidad'] = df['CausaMortalidad'].astype('category')
-    df['TipoPoblacionObjetivo'] = df['TipoPoblacionObjetivo'].astype('category')
-    
-    print(" Variables convertidas a categóricas")
-    print(f"Tipos actualizados:\n{df[['NombreRegion', 'CausaMortalidad', 'TipoPoblacionObjetivo']].dtypes}")
-    
-    # 6. PRIMERAS RESPUESTAS A TUS PREGUNTAS
-    print("\n" + "="*50)
-    print("RESPUESTAS INICIALES A TUS PREGUNTAS")
-    print("="*50)
-    
-    # Pregunta 1: ¿En qué años hubieron más suicidios?
-    print("\n 1. TOTAL DE SUICIDIOS POR AÑO:")
-    suicidios_por_anio = df.groupby('Anio')['NumeroCasos'].sum()
-    print(suicidios_por_anio)
-    
-    # Pregunta 2: ¿Cuáles regiones tienen más suicidios?
-    print("\n  2. TOTAL DE SUICIDIOS POR REGIÓN:")
-    suicidios_por_region = df.groupby('NombreRegion')['NumeroCasos'].sum().sort_values(ascending=False)
-    print(suicidios_por_region)
-
-        # 7. ANÁLISIS DETALLADO DE REGIONES MÁS AFECTADAS
-    print("\n" + "="*50)
-    print("ANÁLISIS DETALLADO: REGIONES MÁS AFECTADAS")
-    print("="*50)
-    
-    # Filtrar solo las dos regiones más afectadas (como muestra el documento)
-    regiones_criticas = ['VALLE DE ABURRA', 'ORIENTE']
-    df_regiones_criticas = df[df['NombreRegion'].isin(regiones_criticas)]
-    
-    print(" SUICIDIOS EN REGIONES CRÍTICAS POR AÑO:")
-    suicidios_regiones_anio = df_regiones_criticas.groupby(['NombreRegion', 'Anio'])['NumeroCasos'].sum()
-    print(suicidios_regiones_anio.head(10))  # Mostramos primeros 10 resultados
-    
-    # 8. IDENTIFICAR MUNICIPIOS MÁS AFECTADOS
-    print("\n TOP 10 MUNICIPIOS CON MÁS CASOS:")
-    top_municipios = df.groupby('NombreMunicipio')['NumeroCasos'].sum().sort_values(ascending=False).head(10)
-    print(top_municipios)
-    
-        # 9. IDENTIFICAR PUNTOS CRÍTICOS ESPECÍFICOS
-    print("\n" + "="*50)
-    print("IDENTIFICACIÓN DE PUNTOS CRÍTICOS")
-    print("="*50)
-    
-    # A. Municipio con MÁS casos en un solo año
-    print(" MUNICIPIO CON MÁS CASOS EN UN AÑO:")
-    max_casos = df['NumeroCasos'].max()
-    municipio_max = df[df['NumeroCasos'] == max_casos][['NombreMunicipio', 'Anio', 'NumeroCasos']]
-    print(municipio_max)
-    
-    # B. Año con MÁS casos totales
-    print("\n AÑO CON MÁS SUICIDIOS TOTALES:")
-    anio_max = df.groupby('Anio')['NumeroCasos'].sum().idxmax()
-    total_anio_max = df.groupby('Anio')['NumeroCasos'].sum().max()
-    print(f"Año: {anio_max}, Total casos: {total_anio_max}")
-    
-    # C. Top 5 municipios con más casos acumulados
-    print("\n TOP 5 MUNICIPIOS (ACUMULADO TODOS LOS AÑOS):")
-    top5_municipios = df.groupby('NombreMunicipio')['NumeroCasos'].sum().sort_values(ascending=False).head(5)
-    print(top5_municipios)
-
-        # 10. RESUMEN EJECUTIVO FINAL
-    print("\n" + "="*60)
-    print(" RESUMEN EJECUTIVO - SUICIDIOS EN ANTIOQUIA")
-    print("="*60)
-    
-    # Hallazgos principales
-    total_suicidios = df['NumeroCasos'].sum()
-    años_analizados = df['Anio'].nunique()
-    municipios_analizados = df['NombreMunicipio'].nunique()
-    
-    print(f" TOTAL SUICIDIOS REGISTRADOS: {total_suicidios:,}")
-    print(f" PERIODO ANALIZADO: {años_analizados} años ({df['Anio'].min()} - {df['Anio'].max()})")
-    print(f"  MUNICIPIOS ANALIZADOS: {municipios_analizados}")
-    print(f" AÑO MÁS CRÍTICO: {anio_max} ({total_anio_max} casos)")
-    print(f" REGIONES MÁS AFECTADAS: VALLE DE ABURRA y ORIENTE")
-    
-    # Municipio con máximo casos
-    print(f"MUNICIPIO MÁS AFECTADO EN UN AÑO: {municipio_max['NombreMunicipio'].values[0]}")
-    print(f"   - Año: {municipio_max['Anio'].values[0]}")
-    print(f"   - Casos: {municipio_max['NumeroCasos'].values[0]}")
-    
-    print("\n" + "="*60)
-    print(" ANÁLISIS COMPLETADO")
-    print("="*60)
 if __name__ == "__main__":
     main()
