@@ -1,13 +1,13 @@
 # Informe de Análisis: Dataset de Suicidios en Antioquia (2005-2024)
 
-## 1. Descripción General del Dataset
+# 1. Descripción General del Dataset
 
-**Nombre:** Suicidios en Antioquia (2005-2024)  
-**Fuente:** Secretaría de Salud y Protección Social Departamental de Antioquia  
-**Dimensiones:** 2,500 registros × 10 variables  
-**Período temporal:** 2005-2024 (20 años)  
-**Cobertura geográfica:** 125 municipios distribuidos en 9 regiones de Antioquia  
-**Archivo:** `suicidios-en-antioquia.csv`
+**Nombre**: Suicidios en Antioquia (2005-2024)
+**Fuente**: Secretaría de Salud y Protección Social Departamental de Antioquia
+**Dimensiones**: 2,500 registros × 10 variables
+**Período temporal**: 2005-2024 (20 años)
+**Cobertura geográfica:** 125 municipios distribuidos en 9 regiones de Antioquia
+**Archivo:** suicidios-en-antioquia.csv
 
 **Descripción:** Este dataset contiene registros oficiales de casos de suicidio en todos los municipios de Antioquia durante dos décadas. Cada registro representa la información anual de un municipio específico, incluyendo datos poblacionales, geográficos y el número de casos registrados.
 
@@ -26,7 +26,46 @@
 | `NumeroPoblacionObjetivo` | object        | int64      | **Numérica (entera)**  | Población del municipio                   |
 | `NumeroCasos`             | int64         | int64      | **Numérica (entera)**  | **Variable objetivo: casos de suicidio**  |
 
+## 2.1 Interpretación de los Tipos de Datos Originales
+
+Durante la ejecución del código, se imprimió la siguiente salida:
+
+=== TIPOS DE DATOS ORIGINALES ===
+NombreMunicipio            object
+CodigoMunicipio             int64
+Ubicación                  object
+NombreRegion               object
+CodigoRegion                int64
+Anio                        int64
+CausaMortalidad            object
+TipoPoblacionObjetivo      object
+NumeroPoblacionObjetivo    object
+NumeroCasos                 int64
+dtype: object
+
+**Interpretación:**
+
+Las columnas con tipo object representan texto o cadenas (por ejemplo: NombreMunicipio, Ubicación, NombreRegion, etc.).
+
+Las columnas con tipo int64 son números enteros, útiles para cálculos y análisis estadísticos (por ejemplo: Anio, CodigoMunicipio, NumeroCasos).
+
+La columna NumeroPoblacionObjetivo aparece como texto (object) porque contiene comas en los números, lo que impide reconocerla como número hasta limpiarla.
+
+🧹**Solución aplicada:**
+
+Para corregirlo y convertir esa columna a tipo numérico, se utilizó:
+
+df['NumeroPoblacionObjetivo'] = df['NumeroPoblacionObjetivo'].str.replace(',', '').astype(int)
+
+
+Esto elimina las comas y permite realizar operaciones matemáticas correctamente.
+
 ## 3. Transformaciones Aplicadas
+
+
+En resumen:
+👉 **Inserta la nueva sección justo entre** `## 2. Clasificación de Columnas por Tipo` **y** `## 3. Transformaciones Aplicadas`.
+
 
 **A. Conversión de Variables Categóricas:**
 
